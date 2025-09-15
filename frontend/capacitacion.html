@@ -5,95 +5,117 @@
   <title>Capacitación</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-50 min-h-screen p-6">
+<body class="bg-gray-50 min-h-screen">
+  <!-- Botón volver -->
+  <div class="p-4">
+    <a href="/dashboard.html" class="px-3 py-1 bg-gray-600 text-white rounded">&larr; Volver</a>
+  </div>
+
   <div class="max-w-4xl mx-auto bg-white p-6 rounded shadow">
     <h2 class="text-xl font-bold">Capacitación</h2>
 
-    <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-      <div>
-        <h3 class="font-semibold">Documentos base</h3>
-        <div id="docsList" class="mt-2 space-y-2"></div>
-      </div>
-
-      <div>
-        <h3 class="font-semibold">Subir archivo aplicado</h3>
-        <form id="uploadForm" class="space-y-2">
-          <select id="categoria" class="border p-2 rounded w-full">
-            <option value="objetivos">Objetivos y beneficios</option>
-            <option value="phva">Ciclo PHVA</option>
-            <option value="organizacion">Organización</option>
-          </select>
-          <input id="empresa_id" placeholder="Empresa ID (opcional)" class="border p-2 rounded w-full" />
-          <input type="file" id="fileInput" class="w-full" />
-          <button class="bg-green-600 text-white p-2 rounded" type="button" id="btnUpload">Subir</button>
-        </form>
-
-        <h4 class="mt-4 font-semibold">Mis archivos</h4>
-        <div id="myFiles" class="mt-2"></div>
-      </div>
+    <!-- Categorías -->
+    <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+      <button onclick="openModal('objetivos')" class="p-4 bg-blue-600 text-white rounded">Objetivos y Beneficios</button>
+      <button onclick="openModal('phva')" class="p-4 bg-green-600 text-white rounded">Ciclo PHVA</button>
+      <button onclick="openModal('organizacion')" class="p-4 bg-indigo-600 text-white rounded">Organización</button>
     </div>
+  </div>
 
+  <!-- Modal -->
+  <div id="modal" class="hidden fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+    <div class="bg-white p-6 rounded shadow-lg w-96 relative">
+      <h2 id="modalTitle" class="text-lg font-bold mb-4">Documento</h2>
+
+      <!-- Enlace al documento base -->
+      <a href="/docs/Organigrama+Formato.xlsx" class="text-blue-600 underline block mb-3" target="_blank">
+        Descargar documento base
+      </a>
+
+      <!-- Enlace al archivo subido -->
+      <div id="archivoEnlace" class="mb-3 hidden">
+        <span class="font-medium">Archivo actual:</span>
+        <a id="archivoLink" href="#" target="_blank" class="text-blue-600 underline ml-2"></a>
+      </div>
+
+      <!-- Subir archivo -->
+      <input type="file" id="fileInput" class="mb-3" />
+      <button onclick="uploadFile()" class="px-4 py-2 bg-blue-600 text-white rounded">Subir archivo</button>
+
+      <!-- Mensaje -->
+      <p id="mensaje" class="mt-3 text-sm"></p>
+
+      <!-- Cerrar -->
+      <button onclick="closeModal()" class="absolute top-2 right-2 text-gray-500">&times;</button>
+    </div>
   </div>
 
 <script>
 const token = localStorage.getItem('token');
 if (!token) location.href = '/index.html';
 
-async function loadDocs() {
-  const res = await fetch('/api/capacitacion/docs');
-  const data = await res.json();
-  const el = document.getElementById('docsList');
-  el.innerHTML = '';
-  for (const d of data) {
-    const a = document.createElement('a');
-    a.href = d.url; a.target = '_blank';
-    a.className = 'block p-2 border rounded';
-    a.innerText = d.nombre;
-    el.appendChild(a);
-  }
-}
+let currentCategory = null;
 
-async function loadMyFiles() {
-  const res = await fetch('/api/capacitacion/myfiles', {
+// Abrir modal
+function openModal(category) {
+  currentCategory = category;
+  document.getElementById('modalTitle').innerText = category;
+  document.getElementById('mensaje').innerText = '';
+  document.getElementById('fileInput').value = '';
+
+  // Cargar archivo actual
+  fetch('/api/capacitacion/myfiles', {
     headers: { 'Authorization': 'Bearer ' + token }
-  });
-  const data = await res.json();
-  const el = document.getElementById('myFiles');
-  el.innerHTML = '';
-  for (const f of data) {
-    const div = document.createElement('div');
-    div.className = 'p-2 border rounded mb-1';
-    div.innerHTML = `<a href="${f.ruta_archivo}" target="_blank">${f.nombre_original}</a> <div class="text-xs text-gray-500">${f.categoria} - ${f.fecha_subida}</div>`;
-    el.appendChild(div);
-  }
+  })
+    .then(res => res.json())
+    .then(data => {
+      const f = data.find(x => x.categoria === category);
+      if (f) {
+        document.getElementById('archivoLink').innerText = f.nombre_original;
+        document.getElementById('archivoLink').href = f.ruta_archivo;
+        document.getElementById('archivoEnlace').classList.remove('hidden');
+      } else {
+        document.getElementById('archivoEnlace').classList.add('hidden');
+      }
+    });
+
+  document.getElementById('modal').classList.remove('hidden');
 }
 
-document.getElementById('btnUpload').addEventListener('click', async () => {
+// Cerrar modal
+function closeModal() {
+  document.getElementById('modal').classList.add('hidden');
+}
+
+// Subir archivo
+function uploadFile() {
   const file = document.getElementById('fileInput').files[0];
-  if (!file) return alert('Selecciona un archivo');
-  const categoria = document.getElementById('categoria').value;
-  const empresa_id = document.getElementById('empresa_id').value || '';
-  const fd = new FormData();
-  fd.append('file', file);
-  fd.append('categoria', categoria);
-  fd.append('empresa_id', empresa_id);
-
-  const res = await fetch('/api/capacitacion/upload', {
-    method: 'POST',
-    headers: { 'Authorization': 'Bearer ' + token },
-    body: fd
-  });
-  const data = await res.json();
-  if (res.ok) {
-    alert('Archivo subido');
-    loadMyFiles();
-  } else {
-    alert('Error: ' + (data.error || JSON.stringify(data)));
+  if (!file) {
+    alert("Selecciona un archivo");
+    return;
   }
-});
 
-loadDocs();
-loadMyFiles();
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('categoria', currentCategory);
+
+  fetch('/api/capacitacion/upload', {
+    method: 'PUT',
+    headers: { 'Authorization': 'Bearer ' + token },
+    body: formData
+  })
+    .then(res => res.json())
+    .then(data => {
+      document.getElementById('mensaje').innerText = data.message;
+      if (data.fileUrl) {
+        document.getElementById('archivoLink').innerText = data.fileName;
+        document.getElementById('archivoLink').href = data.fileUrl;
+        document.getElementById('archivoEnlace').classList.remove('hidden');
+      }
+    })
+    .catch(err => console.error(err));
+}
 </script>
 </body>
 </html>
+

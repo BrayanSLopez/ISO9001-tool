@@ -144,6 +144,7 @@ document.getElementById('btnRegister').addEventListener('click', async () => {
   const data = await res.json();
   if (res.ok) {
     localStorage.setItem('token', data.token);
+    localStorage.setItem('user', JSON.stringify(data.user || { correo: payload.correo, nombre: payload.nombre }));
     location.href = '/dashboard.html';
   } else {
     document.getElementById('msg').innerText = data.error || JSON.stringify(data);
