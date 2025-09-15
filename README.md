@@ -7,7 +7,8 @@ Repositorio demo para una herramienta de implementación, capacitación y audito
 - npm
 
 ## Instalar y ejecutar
-1. `npm install`
+1. `npm install node`
+1.1 `node backend/app.js`
 2. Copia `.env.example` a `.env` y ajusta si quieres.
 3. `npm start`
 4. El backend correrá en `http://localhost:4000` por defecto.

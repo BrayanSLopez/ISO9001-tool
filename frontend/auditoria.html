@@ -5,23 +5,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Auditoría - Historial</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- jsPDF para exportar a PDF -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body class="bg-gray-100 min-h-screen flex flex-col">
-  <!-- Header -->
   <header class="bg-blue-700 text-white p-4 text-center text-xl font-bold shadow">
     Auditoría - Historial
   </header>
 
-  <!-- Contenido -->
+  <div class="p-4">
+    <a href="/dashboard.html" class="px-3 py-1 bg-gray-600 text-white rounded">&larr; Volver</a>
+  </div>
   <main class="flex-1 p-6 max-w-6xl mx-auto w-full">
     <div class="flex items-center justify-between mb-4">
       <h2 class="text-2xl font-semibold">Historial de Auditorías</h2>
-      <a href="/dashboard.html" class="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700">Volver al Dashboard</a>
     </div>
-
-    <!-- Filtros -->
     <div class="bg-white p-4 rounded shadow mb-6 flex flex-col md:flex-row gap-4 items-end">
       <div class="flex flex-col">
         <label class="text-sm font-semibold">Desde:</label>
@@ -31,35 +28,31 @@
         <label class="text-sm font-semibold">Hasta:</label>
         <input type="date" id="filterTo" class="border rounded p-2"/>
       </div>
-      <button id="applyFilterBtn" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Aplicar Filtro</button>
-      <button id="clearFilterBtn" class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600">Limpiar</button>
+      <button id="applyFilterBtn" class="px-4 py-2 bg-blue-600 text-white rounded">Aplicar Filtro</button>
+      <button id="clearFilterBtn" class="px-4 py-2 bg-gray-500 text-white rounded">Limpiar</button>
     </div>
 
-    <!-- Historial -->
     <div id="history" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"></div>
     <p id="noDataMsg" class="text-center text-gray-600 mt-8 hidden">No hay auditorías registradas aún.</p>
   </main>
 
-  <!-- Modal flotante -->
+  <!-- Modal -->
   <div id="modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
-    <div class="bg-white rounded-lg shadow-lg max-w-3xl w-full p-6 overflow-y-auto max-h-[80vh]" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="bg-white rounded-lg shadow-lg max-w-3xl w-full p-6 overflow-y-auto max-h-[80vh]">
       <div class="flex items-start justify-between">
         <h3 id="modalTitle" class="text-xl font-bold">Detalle de la Auditoría</h3>
-        <button id="closeModalBtn" aria-label="Cerrar" class="text-gray-500 hover:text-gray-800">✕</button>
+        <button id="closeModalBtn" class="text-gray-500 hover:text-gray-800">✕</button>
       </div>
-
       <div id="modalMeta" class="mt-2 text-sm text-gray-600"></div>
       <hr class="my-4" />
       <div id="modalContent" class="space-y-3"></div>
-
       <div class="mt-6 flex justify-between">
-        <button id="downloadPdfBtn" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">Descargar PDF</button>
-        <button id="closeModalBtnFooter" class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">Cerrar</button>
+        <button id="downloadPdfBtn" class="px-4 py-2 bg-green-600 text-white rounded">Descargar PDF</button>
+        <button id="closeModalBtnFooter" class="px-4 py-2 bg-red-600 text-white rounded">Cerrar</button>
       </div>
     </div>
   </div>
 
-  <!-- Footer -->
   <footer class="bg-gray-800 text-white text-center p-3 text-sm">
     © 2025 ISO9001 Tool - Auditoría
   </footer>
@@ -89,17 +82,25 @@
         const res = await fetch('/api/auditoria/history', {
           headers: { 'Authorization': 'Bearer ' + token }
         });
-        if (!res.ok) {
-          console.error('Error cargando historial:', res.status);
-          historyContainer.innerHTML = `<div class="col-span-full text-red-600">Error cargando historial (${res.status})</div>`;
-          return;
-        }
         const data = await res.json();
-        allAudits = data;
-        renderHistory(data);
+
+        allAudits = data.map(a => {
+          if (a.items && a.items.length > 0) {
+            let score = 0;
+            a.items.forEach(it => {
+              if (it.estado === "Cumple") score += 1;
+              else if (it.estado === "En proceso") score += 0.5;
+            });
+            a.porcentaje = (score / a.items.length) * 100;
+          } else {
+            a.porcentaje = null;
+          }
+          return a;
+        });
+
+        renderHistory(allAudits);
       } catch (err) {
-        console.error('Error fetching history:', err);
-        historyContainer.innerHTML = `<div class="col-span-full text-red-600">Error de conexión</div>`;
+        console.error('Error cargando historial:', err);
       }
     }
 
@@ -113,12 +114,12 @@
 
       audits.forEach(h => {
         const card = document.createElement('article');
-        card.className = 'p-4 bg-white rounded shadow hover:shadow-lg transition flex flex-col';
+        card.className = 'p-4 bg-white rounded shadow flex flex-col';
 
         let badgeBg = 'bg-green-500';
         let textColor = 'text-white';
         if (typeof h.porcentaje === 'number') {
-          if (h.porcentaje < 60) { badgeBg = 'bg-red-700'; textColor = 'text-white'; }
+          if (h.porcentaje < 60) { badgeBg = 'bg-red-700'; }
           else if (h.porcentaje < 70) { badgeBg = 'bg-red-500'; }
           else if (h.porcentaje < 90) { badgeBg = 'bg-yellow-500'; textColor = 'text-black'; }
         } else {
@@ -126,8 +127,8 @@
         }
 
         const title = document.createElement('div');
-        title.innerHTML = `<div class="font-bold text-lg">Auditoría #${h.id_checklist ?? ''}</div>
-          <div class="text-sm text-gray-600 mt-1">Fecha: ${h.fecha_aplicacion ?? 'N/A'}</div>
+        title.innerHTML = `<div class="font-bold text-lg">Auditoría #${h.id_checklist}</div>
+          <div class="text-sm text-gray-600">Fecha: ${h.fecha_aplicacion ?? 'N/A'}</div>
           <div class="text-sm text-gray-600">Implementador: ${h.implementador ?? 'N/A'}</div>`;
 
         const footer = document.createElement('div');
@@ -138,8 +139,7 @@
         badge.textContent = (typeof h.porcentaje === 'number') ? `${Math.round(h.porcentaje)}%` : 'N/A';
 
         const detailBtn = document.createElement('button');
-        detailBtn.className = 'ml-auto px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm';
-        detailBtn.type = 'button';
+        detailBtn.className = 'ml-auto px-3 py-1 bg-blue-600 text-white rounded';
         detailBtn.textContent = 'Ver detalle';
         detailBtn.addEventListener('click', () => openModal(h));
 
@@ -148,127 +148,51 @@
 
         card.appendChild(title);
         card.appendChild(footer);
-
         historyContainer.appendChild(card);
       });
     }
 
-    function openModal(auditoria) {
-      currentAudit = auditoria;
-      modalMeta.innerHTML = `
-        <div><b>ID:</b> ${auditoria.id_checklist ?? ''} &nbsp; <b>Fecha:</b> ${auditoria.fecha_aplicacion ?? 'N/A'}</div>
-        <div class="mt-1"><b>Implementador:</b> ${auditoria.implementador ?? 'N/A'} &nbsp; <b>Puntaje:</b> ${auditoria.porcentaje ?? 'N/A'}%</div>
-      `;
+    function openModal(a) {
+      currentAudit = a;
+      modalMeta.innerHTML = `<b>ID:</b> ${a.id_checklist} - <b>Fecha:</b> ${a.fecha_aplicacion ?? 'N/A'}<br>
+        <b>Implementador:</b> ${a.implementador ?? 'N/A'} - <b>Puntaje:</b> ${a.porcentaje ? Math.round(a.porcentaje) : 'N/A'}%`;
 
       modalContent.innerHTML = '';
-      if (!auditoria.items || auditoria.items.length === 0) {
-        modalContent.innerHTML = `<p class="text-gray-600">No hay ítems registrados en esta auditoría.</p>`;
+      if (!a.items || a.items.length === 0) {
+        modalContent.innerHTML = `<p>No hay ítems registrados en esta auditoría.</p>`;
       } else {
-        auditoria.items.forEach(it => {
+        a.items.forEach(it => {
           const itemDiv = document.createElement('div');
-          itemDiv.className = 'p-3 border rounded flex flex-col gap-2';
+          itemDiv.className = 'p-3 border rounded';
 
-          const header = document.createElement('div');
-          header.className = 'flex items-center justify-between';
+          itemDiv.innerHTML = `<b>${it.numero_item}</b> - ${it.estado}<br>
+            ${it.comentario ? `<i>${it.comentario}</i>` : ''}`;
 
-          const numero = document.createElement('span');
-          numero.className = 'font-semibold';
-          numero.textContent = it.numero_item ?? it.item ?? 'Ítem';
-
-          const estadoSpan = document.createElement('span');
-          estadoSpan.className = 'px-2 py-1 rounded text-xs font-medium';
-          if (it.estado === 'Cumple') estadoSpan.classList.add('bg-green-100','text-green-800');
-          else if (it.estado === 'En proceso') estadoSpan.classList.add('bg-yellow-100','text-yellow-800');
-          else estadoSpan.classList.add('bg-red-100','text-red-800');
-          estadoSpan.textContent = it.estado ?? 'N/A';
-
-          header.appendChild(numero);
-          header.appendChild(estadoSpan);
-          itemDiv.appendChild(header);
-
-          if (it.comentario) {
-            const comentario = document.createElement('div');
-            comentario.className = 'mt-2 text-sm text-gray-700';
-            comentario.innerHTML = `<b>Comentario:</b> ${escapeHtml(it.comentario)}`;
-            itemDiv.appendChild(comentario);
-          }
           modalContent.appendChild(itemDiv);
         });
       }
+
       modal.classList.remove('hidden');
       modal.classList.add('flex');
-      document.body.style.overflow = 'hidden';
     }
 
     function closeModal() {
       modal.classList.add('hidden');
       modal.classList.remove('flex');
-      document.body.style.overflow = '';
-    }
-
-    function escapeHtml(unsafe) {
-      return String(unsafe).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
-        .replace(/"/g,"&quot;").replace(/'/g,"&#039;");
-    }
-
-    async function downloadPdf() {
-      if (!currentAudit) return;
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF();
-
-      doc.setFontSize(16);
-      doc.text("Informe de Auditoría", 10, 20);
-      doc.setFontSize(12);
-      doc.text(`ID: ${currentAudit.id_checklist}`, 10, 30);
-      doc.text(`Fecha: ${currentAudit.fecha_aplicacion ?? 'N/A'}`, 10, 38);
-      doc.text(`Implementador: ${currentAudit.implementador ?? 'N/A'}`, 10, 46);
-      doc.text(`Puntaje: ${currentAudit.porcentaje ?? 'N/A'}%`, 10, 54);
-
-      let y = 70;
-      if (currentAudit.items && currentAudit.items.length > 0) {
-        doc.setFontSize(14);
-        doc.text("Detalle de Ítems:", 10, y);
-        y += 8;
-        doc.setFontSize(11);
-        currentAudit.items.forEach(it => {
-          if (y > 270) { doc.addPage(); y = 20; }
-          doc.text(`${it.numero_item ?? ''} - ${it.estado ?? ''}`, 10, y);
-          y += 6;
-          if (it.comentario) {
-            doc.text(`Comentario: ${it.comentario}`, 15, y);
-            y += 6;
-          }
-        });
-      }
-      doc.save(`auditoria_${currentAudit.id_checklist}.pdf`);
-    }
-
-    function applyFilter() {
-      const fromDate = filterFrom.value ? new Date(filterFrom.value) : null;
-      const toDate = filterTo.value ? new Date(filterTo.value) : null;
-      let filtered = allAudits;
-
-      if (fromDate) {
-        filtered = filtered.filter(a => new Date(a.fecha_aplicacion) >= fromDate);
-      }
-      if (toDate) {
-        filtered = filtered.filter(a => new Date(a.fecha_aplicacion) <= toDate);
-      }
-      renderHistory(filtered);
     }
 
     closeModalBtn.addEventListener('click', closeModal);
     closeModalBtnFooter.addEventListener('click', closeModal);
-    downloadPdfBtn.addEventListener('click', downloadPdf);
-    applyFilterBtn.addEventListener('click', applyFilter);
-    clearFilterBtn.addEventListener('click', () => {
-      filterFrom.value = '';
-      filterTo.value = '';
-      renderHistory(allAudits);
+    downloadPdfBtn.addEventListener('click', () => {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      doc.text("Informe de Auditoría", 10, 10);
+      doc.save(`auditoria_${currentAudit.id_checklist}.pdf`);
     });
 
-    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
     loadHistory();
   </script>
 </body>
 </html>
+
+
