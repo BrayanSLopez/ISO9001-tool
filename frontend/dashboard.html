@@ -1,0 +1,38 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Dashboard - ISO9001</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+  <div class="max-w-4xl mx-auto p-6">
+    <div class="flex justify-between items-center">
+      <h1 class="text-2xl font-bold">ISO9001 Tool</h1>
+      <button id="logout" class="px-3 py-1 border rounded">Cerrar sesión</button>
+    </div>
+
+    <div class="mt-6 bg-white p-6 rounded shadow">
+      <p>Bienvenido, <span id="userName"></span></p>
+      <div class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+        <a href="/checklist.html" class="p-4 block text-center bg-blue-600 text-white rounded">Implementación</a>
+        <a href="/capacitacion.html" class="p-4 block text-center bg-green-600 text-white rounded">Capacitación</a>
+        <a href="/auditoria.html" class="p-4 block text-center bg-indigo-600 text-white rounded">Auditoría</a>
+      </div>
+    </div>
+  </div>
+
+<script>
+const token = localStorage.getItem('token');
+if (!token) location.href = '/index.html';
+const user = JSON.parse(localStorage.getItem('user') || '{}');
+document.getElementById('userName').innerText = user.nombre || user.correo || 'Usuario';
+
+document.getElementById('logout').addEventListener('click', () => {
+  localStorage.removeItem('token');
+  localStorage.removeItem('user');
+  location.href = '/index.html';
+});
+</script>
+</body>
+</html>

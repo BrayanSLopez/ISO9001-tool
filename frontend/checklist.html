@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Checklist ISO 9001:2015</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col">
+  <!-- Header -->
+  <header class="bg-blue-700 text-white p-4 text-center text-xl font-bold shadow">
+    Checklist ISO 9001:2015
+  </header>
+
+  <!-- Contenido -->
+  <main class="flex-1 p-6 max-w-7xl mx-auto">
+    <h2 class="text-lg font-semibold mb-4">Seleccione el cumplimiento de cada cláusula</h2>
+    
+    <form id="checklistForm" class="space-y-4">
+      <!-- Datos del implementador -->
+      <div class="p-4 bg-white border rounded shadow-sm space-y-3">
+        <div>
+          <label class="block text-sm font-medium">Implementador</label>
+          <input type="text" id="implementador" name="implementador" required class="border p-2 rounded w-full" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium">Fecha</label>
+          <input type="date" id="fecha" name="fecha_aplicacion" required class="border p-2 rounded w-full" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium">Empresa</label>
+          <input type="text" id="empresa" name="empresa_id" required class="border p-2 rounded w-full" />
+        </div>
+      </div>
+
+      <!-- Checklist dinámico -->
+      <div id="itemsList" class="space-y-3"></div>
+
+      <!-- Botones -->
+      <div class="flex gap-4 mt-6">
+        <button type="submit" class="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+          Guardar Checklist
+        </button>
+        <a href="/dashboard.html" class="px-6 py-2 bg-gray-500 text-white rounded hover:bg-gray-600">
+          Volver
+        </a>
+      </div>
+    </form>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-gray-800 text-white text-center p-3 text-sm">
+    © 2025 ISO9001 Tool - Checklist
+  </footer>
+
+  <script>
+    // Verificar token (redirecciona si no hay login)
+    const token = localStorage.getItem('token');
+    if (!token) location.href = '/index.html';
+
+    // Ítems de la norma ISO 9001:2015
+    const checklistItems = [
+      '4.1 Comprensión de la organización y de su contexto',
+      '4.2 Comprensión de las necesidades y expectativas de las partes interesadas',
+      '4.3 Determinación del alcance del sistema de gestión de la calidad',
+      '4.4 Sistema de gestión de la calidad y sus procesos',
+      '5.1 Liderazgo y compromiso',
+      '5.2 Política de calidad',
+      '5.3 Roles, responsabilidades y autoridades en la organización',
+      '6.1 Acciones para abordar riesgos y oportunidades',
+      '6.2 Objetivos de calidad y planificación para alcanzarlos',
+      '6.3 Planificación de los cambios',
+      '7.1 Recursos',
+      '7.2 Competencia',
+      '7.3 Conciencia',
+      '7.4 Comunicación',
+      '7.5 Información documentada',
+      '8.1 Planificación y control operacional',
+      '8.2 Requisitos para los productos y los servicios',
+      '8.2.1 Comunicación con el cliente',
+      '8.2.2 Determinación de los requisitos para los productos y servicios',
+      '8.2.3 Revisión de los requisitos de los productos y servicios',
+      '8.2.4 Cambios en los requisitos de los productos y los servicios',
+      '8.3 Diseño y desarrollo de productos y servicios',
+      '8.3.1 Generalidades',
+      '8.3.2 Planificación del diseño y desarrollo',
+      '8.3.3 Entradas para el diseño y desarrollo',
+      '8.3.4 Controles del diseño y desarrollo',
+      '8.3.5 Salidas del diseño y desarrollo',
+      '8.3.6 Cambios del diseño y desarrollo',
+      '8.4 Control de los procesos, productos y servicios suministrados externamente',
+      '8.4.1 General',
+      '8.4.2 Tipo y alcance del control',
+      '8.4.3 Información para los proveedores externos',
+      '8.5 Producción y prestación del servicio',
+      '8.5.1 Control de la producción y prestación del servicio',
+      '8.5.2 Identificación y trazabilidad',
+      '8.5.3 Propiedad perteneciente a los clientes o proveedores externos',
+      '8.5.4 Preservación',
+      '8.5.5 Actividades posteriores a la entrega',
+      '8.5.6 Control de los cambios',
+      '8.6 Liberación de productos y servicios',
+      '8.7 Control de productos y servicios no conformes',
+      '9.1 Seguimiento, medición, análisis y evaluación',
+      '9.1.1 General',
+      '9.1.2 Satisfacción del cliente',
+      '9.1.3 Análisis y evaluación',
+      '9.2 Auditoría interna',
+      '9.3 Revisión por la dirección',
+      '10.1 Generalidades',
+      '10.2 No conformidad y acción correctiva',
+      '10.3 Mejora continua'
+    ];
+
+    // Generar dinámicamente el checklist
+    const container = document.getElementById('itemsList');
+    checklistItems.forEach(numTitle => {
+      const div = document.createElement('div');
+      div.className = 'p-4 bg-white border rounded shadow-sm flex flex-col gap-2';
+      div.innerHTML = `
+        <div class="font-semibold">${numTitle}</div>
+        <div class="flex flex-col sm:flex-row gap-2 items-start sm:items-center">
+          <select data-num="${numTitle}" class="border p-2 rounded w-48">
+            <option value="Cumple">Cumple</option>
+            <option value="En proceso">En proceso</option>
+            <option value="No cumple">No cumple</option>
+          </select>
+          <input data-num-c="${numTitle}" placeholder="Comentario (opcional)" class="border p-2 rounded flex-1" />
+        </div>
+      `;
+      container.appendChild(div);
+    });
+
+    // Guardar checklist
+    document.getElementById('checklistForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const implementador = document.getElementById('implementador').value;
+      const fecha_aplicacion = document.getElementById('fecha').value;
+      const empresa_id = document.getElementById('empresa').value;
+
+      const items = checklistItems.map(item => {
+        return {
+          numero_item: item,
+          estado: document.querySelector(`[data-num="${item}"]`).value,
+          comentario: document.querySelector(`[data-num-c="${item}"]`).value
+        };
+      });
+
+      try {
+        const resp = await fetch('/api/checklist/create', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + token
+          },
+          body: JSON.stringify({ implementador, fecha_aplicacion, empresa_id, items })
+        });
+
+        if (resp.ok) {
+          const data = await resp.json();
+          alert('Checklist guardado correctamente ✅ ID: ' + data.id_checklist);
+        } else {
+          const error = await resp.json();
+          alert('Error al guardar checklist ❌ ' + (error.error || ''));
+        }
+      } catch (err) {
+        console.error(err);
+        alert('Error de conexión con el servidor ❌');
+      }
+    });
+  </script>
+</body>
+</html>
+
+

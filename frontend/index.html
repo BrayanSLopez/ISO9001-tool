@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <title>ISO9001 Tool - Iniciar sesión</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="min-h-screen bg-gray-100">
+  <!-- Fondo -->
+  <div class="absolute inset-0">
+    <img src="/assets/bg.jpg" alt="background" class="w-full h-full object-cover" />
+    <div class="absolute inset-0 bg-black/50"></div>
+  </div>
+
+  <!-- Contenido centrado -->
+  <div class="relative min-h-screen flex items-center justify-center">
+    <div class="w-full max-w-md bg-white rounded-2xl shadow-2xl p-8">
+      <h1 class="text-3xl font-bold text-center text-blue-700 mb-6">ISO9001 Tool</h1>
+
+      <!-- Login -->
+      <div id="loginBox">
+        <h2 class="text-lg font-semibold mb-4">Iniciar sesión</h2>
+        <input id="loginEmail" type="email" placeholder="Correo" class="w-full border p-3 rounded mb-3 focus:ring-2 focus:ring-blue-500" />
+        <input id="loginPassword" type="password" placeholder="Contraseña" class="w-full border p-3 rounded mb-4 focus:ring-2 focus:ring-blue-500" />
+
+        <button id="btnLogin" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold p-3 rounded-lg transition">
+          Entrar
+        </button>
+
+        <p class="mt-4 text-sm text-gray-600 text-center">
+          ¿No tienes cuenta?
+          <a href="#" id="goRegister" class="text-blue-600 hover:underline font-medium">Regístrate</a>
+        </p>
+
+        <p class="mt-3 text-xs text-gray-500 text-center">
+          Usuario demo: <b>demo@empresa.com</b> / demo1234
+        </p>
+      </div>
+
+      <!-- Registro (oculto al inicio) -->
+      <div id="registerBox" class="hidden">
+        <h2 class="text-lg font-semibold mb-4">Registro rápido</h2>
+        <input id="regNombre" placeholder="Nombre usuario" class="w-full border p-3 rounded mb-3 focus:ring-2 focus:ring-green-500" />
+        <input id="regCorreo" placeholder="Correo" class="w-full border p-3 rounded mb-3 focus:ring-2 focus:ring-green-500" />
+        <input id="regPassword" type="password" placeholder="Contraseña" class="w-full border p-3 rounded mb-4 focus:ring-2 focus:ring-green-500" />
+
+        <h3 class="font-medium mt-3 mb-2">Datos empresa</h3>
+        <input id="regRazon" placeholder="Razón social" class="w-full border p-3 rounded mb-3" />
+        <input id="regNit" placeholder="NIT" class="w-full border p-3 rounded mb-3" />
+        <input id="regTelefono" placeholder="Teléfono" class="w-full border p-3 rounded mb-3" />
+
+        <button id="btnRegister" class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold p-3 rounded-lg transition">
+          Registrar
+        </button>
+
+        <p class="mt-4 text-sm text-gray-600 text-center">
+          ¿Ya tienes cuenta?
+          <a href="#" id="goLogin" class="text-blue-600 hover:underline font-medium">Inicia sesión</a>
+        </p>
+      </div>
+
+      <p id="msg" class="text-sm mt-4 text-red-600 text-center"></p>
+    </div>
+  </div>
+
+<script>
+const API = ''; // si backend está en el mismo host / puerto, deja ''
+
+// --- Toggle entre login y registro ---
+document.getElementById('goRegister').addEventListener('click', () => {
+  document.getElementById('loginBox').classList.add('hidden');
+  document.getElementById('registerBox').classList.remove('hidden');
+});
+document.getElementById('goLogin').addEventListener('click', () => {
+  document.getElementById('registerBox').classList.add('hidden');
+  document.getElementById('loginBox').classList.remove('hidden');
+});
+
+// --- Login ---
+document.getElementById('btnLogin').addEventListener('click', async () => {
+  const correo = document.getElementById('loginEmail').value;
+  const password = document.getElementById('loginPassword').value;
+  const res = await fetch(API + '/api/auth/login', {
+    method: 'POST', headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ correo, password })
+  });
+  const data = await res.json();
+  if (res.ok) {
+    localStorage.setItem('token', data.token);
+    localStorage.setItem('user', JSON.stringify(data.user || { correo }));
+    location.href = '/dashboard.html';
+  } else {
+    document.getElementById('msg').innerText = data.error || data.message || JSON.stringify(data);
+  }
+});
+
+// --- Registro ---
+document.getElementById('btnRegister').addEventListener('click', async () => {
+  const payload = {
+    nombre: document.getElementById('regNombre').value,
+    correo: document.getElementById('regCorreo').value,
+    password: document.getElementById('regPassword').value,
+    razon_social: document.getElementById('regRazon').value,
+    nit: document.getElementById('regNit').value,
+    representante_legal: '',
+    sector_economico: '',
+    tipo_empresa: '',
+    direccion: '',
+    telefono: document.getElementById('regTelefono').value,
+    num_empleados: 0,
+    email_empresa: document.getElementById('regCorreo').value,
+    web: '', facebook: '', instagram: '', tiktok: ''
+  };
+  const res = await fetch(API + '/api/auth/register', {
+    method: 'POST', headers: {'Content-Type':'application/json'},
+    body: JSON.stringify(payload)
+  });
+  const data = await res.json();
+  if (res.ok) {
+    localStorage.setItem('token', data.token);
+    location.href = '/dashboard.html';
+  } else {
+    document.getElementById('msg').innerText = data.error || JSON.stringify(data);
+  }
+});
+</script>
+</body>
+</html>
+
