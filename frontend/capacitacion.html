@@ -6,20 +6,22 @@
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-50 min-h-screen">
+
+  <!-- Header -->
+  <header class="bg-blue-700 text-white p-4 text-center text-xl font-bold shadow">
+    Capacitación - Historial
+  </header>
+
   <!-- Botón volver -->
   <div class="p-4">
     <a href="/dashboard.html" class="px-3 py-1 bg-gray-600 text-white rounded">&larr; Volver</a>
   </div>
 
-  <div class="max-w-4xl mx-auto bg-white p-6 rounded shadow">
-    <h2 class="text-xl font-bold">Capacitación</h2>
+  <div class="max-w-3xl mx-auto bg-white p-6 rounded shadow">
+    <h2 class="text-xl font-bold mb-4">Capacitación</h2>
 
-    <!-- Categorías -->
-    <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-      <button onclick="openModal('objetivos')" class="p-4 bg-blue-600 text-white rounded">Objetivos y Beneficios</button>
-      <button onclick="openModal('phva')" class="p-4 bg-green-600 text-white rounded">Ciclo PHVA</button>
-      <button onclick="openModal('organizacion')" class="p-4 bg-indigo-600 text-white rounded">Organización</button>
-    </div>
+    <!-- Lista de categorías -->
+    <div id="categorias" class="space-y-3"></div>
   </div>
 
   <!-- Modal -->
@@ -36,11 +38,17 @@
       <div id="archivoEnlace" class="mb-3 hidden">
         <span class="font-medium">Archivo actual:</span>
         <a id="archivoLink" href="#" target="_blank" class="text-blue-600 underline ml-2"></a>
+        <div id="archivoFecha" class="text-xs text-gray-500"></div>
       </div>
 
       <!-- Subir archivo -->
       <input type="file" id="fileInput" class="mb-3" />
       <button onclick="uploadFile()" class="px-4 py-2 bg-blue-600 text-white rounded">Subir archivo</button>
+
+      <!-- Barra de progreso -->
+      <div class="w-full bg-gray-200 rounded-full h-2.5 mt-3 hidden" id="progressContainer">
+        <div id="progressBar" class="bg-blue-600 h-2.5 rounded-full" style="width: 0%"></div>
+      </div>
 
       <!-- Mensaje -->
       <p id="mensaje" class="mt-3 text-sm"></p>
@@ -55,15 +63,54 @@ const token = localStorage.getItem('token');
 if (!token) location.href = '/index.html';
 
 let currentCategory = null;
+let currentCategoryName = null;
+let existingFile = null;
+
+// Categorías fijas
+const categorias = [
+  { id: 'objetivos', nombre: 'Objetivos y Beneficios', color: 'bg-blue-600 hover:bg-blue-700' },
+  { id: 'phva', nombre: 'Ciclo PHVA', color: 'bg-green-600 hover:bg-green-700' },
+  { id: 'organizacion', nombre: 'Organización', color: 'bg-indigo-600 hover:bg-indigo-700' },
+  { id: 'liderazgo', nombre: 'Liderazgo', color: 'bg-purple-600 hover:bg-purple-700' },
+  { id: 'planificacion', nombre: 'Planificación', color: 'bg-teal-600 hover:bg-teal-700' },
+  { id: 'apoyo', nombre: 'Apoyo', color: 'bg-pink-600 hover:bg-pink-700' },
+  { id: 'operacion', nombre: 'Operación', color: 'bg-yellow-600 hover:bg-yellow-700' },
+  { id: 'desempeno', nombre: 'Desempeño', color: 'bg-orange-600 hover:bg-orange-700' },
+  { id: 'mejora', nombre: 'Mejora', color: 'bg-red-600 hover:bg-red-700' },
+  { id: 'auditoria', nombre: 'Auditoría', color: 'bg-gray-800 hover:bg-gray-900' }
+];
+
+// Render categorías con iconos
+async function renderCategorias() {
+  const res = await fetch('/api/capacitacion/myfiles', {
+    headers: { 'Authorization': 'Bearer ' + token }
+  });
+  const files = await res.json();
+  const container = document.getElementById('categorias');
+  container.innerHTML = '';
+
+  categorias.forEach(cat => {
+    const file = files.find(f => f.categoria === cat.id);
+    const icon = file ? '✅' : '📂';
+    const btn = document.createElement('button');
+    btn.className = `w-full text-left px-4 py-3 text-white rounded ${cat.color}`;
+    btn.innerHTML = `${icon} ${cat.nombre}`;
+    btn.onclick = () => openModal(cat.id, cat.nombre);
+    container.appendChild(btn);
+  });
+}
 
 // Abrir modal
-function openModal(category) {
+function openModal(category, name) {
   currentCategory = category;
-  document.getElementById('modalTitle').innerText = category;
+  currentCategoryName = name;
+  document.getElementById('modalTitle').innerText = name;
   document.getElementById('mensaje').innerText = '';
   document.getElementById('fileInput').value = '';
+  document.getElementById('progressContainer').classList.add('hidden');
+  existingFile = null;
 
-  // Cargar archivo actual
+  // Cargar archivo actual del usuario
   fetch('/api/capacitacion/myfiles', {
     headers: { 'Authorization': 'Bearer ' + token }
   })
@@ -71,8 +118,10 @@ function openModal(category) {
     .then(data => {
       const f = data.find(x => x.categoria === category);
       if (f) {
+        existingFile = f;
         document.getElementById('archivoLink').innerText = f.nombre_original;
         document.getElementById('archivoLink').href = f.ruta_archivo;
+        document.getElementById('archivoFecha').innerText = `Última actualización: ${f.fecha_subida}`;
         document.getElementById('archivoEnlace').classList.remove('hidden');
       } else {
         document.getElementById('archivoEnlace').classList.add('hidden');
@@ -87,7 +136,7 @@ function closeModal() {
   document.getElementById('modal').classList.add('hidden');
 }
 
-// Subir archivo
+// Subir archivo con confirmación y progreso
 function uploadFile() {
   const file = document.getElementById('fileInput').files[0];
   if (!file) {
@@ -95,27 +144,46 @@ function uploadFile() {
     return;
   }
 
+  if (existingFile && !confirm("Ya existe un archivo en esta categoría. ¿Deseas reemplazarlo?")) {
+    return;
+  }
+
   const formData = new FormData();
   formData.append('file', file);
   formData.append('categoria', currentCategory);
 
-  fetch('/api/capacitacion/upload', {
-    method: 'PUT',
-    headers: { 'Authorization': 'Bearer ' + token },
-    body: formData
-  })
-    .then(res => res.json())
-    .then(data => {
-      document.getElementById('mensaje').innerText = data.message;
-      if (data.fileUrl) {
-        document.getElementById('archivoLink').innerText = data.fileName;
-        document.getElementById('archivoLink').href = data.fileUrl;
-        document.getElementById('archivoEnlace').classList.remove('hidden');
-      }
-    })
-    .catch(err => console.error(err));
+  const xhr = new XMLHttpRequest();
+  xhr.open('PUT', '/api/capacitacion/upload', true);
+  xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+
+  xhr.upload.addEventListener("progress", (e) => {
+    if (e.lengthComputable) {
+      const percent = (e.loaded / e.total) * 100;
+      document.getElementById('progressContainer').classList.remove('hidden');
+      document.getElementById('progressBar').style.width = percent + "%";
+    }
+  });
+
+  xhr.onload = function() {
+    const data = JSON.parse(xhr.responseText);
+    document.getElementById('mensaje').innerText = data.message || "Archivo actualizado";
+    if (data.fileUrl) {
+      document.getElementById('archivoLink').innerText = data.fileName;
+      document.getElementById('archivoLink').href = data.fileUrl;
+      document.getElementById('archivoFecha').innerText = `Última actualización: ${new Date().toLocaleString()}`;
+      document.getElementById('archivoEnlace').classList.remove('hidden');
+    }
+    renderCategorias();
+  };
+
+  xhr.send(formData);
 }
+
+// Inicializar
+renderCategorias();
 </script>
 </body>
 </html>
+
+
 
