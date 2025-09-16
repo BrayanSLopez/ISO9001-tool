@@ -30,7 +30,7 @@
       <h2 id="modalTitle" class="text-lg font-bold mb-4">Documento</h2>
 
       <!-- Enlace al documento base -->
-      <a href="/docs/Organigrama+Formato.xlsx" class="text-blue-600 underline block mb-3" target="_blank">
+      <a id="documentBaseLink" href="#" class="text-blue-600 underline block mb-3" target="_blank">
         Descargar documento base
       </a>
 
@@ -66,21 +66,21 @@ let currentCategory = null;
 let currentCategoryName = null;
 let existingFile = null;
 
-// Categorías fijas
+// Categorías fijas con archivos asociados
 const categorias = [
-  { id: 'objetivos', nombre: 'Objetivos y Beneficios', color: 'bg-blue-600 hover:bg-blue-700' },
-  { id: 'phva', nombre: 'Ciclo PHVA', color: 'bg-green-600 hover:bg-green-700' },
-  { id: 'organizacion', nombre: 'Organización', color: 'bg-indigo-600 hover:bg-indigo-700' },
-  { id: 'liderazgo', nombre: 'Liderazgo', color: 'bg-purple-600 hover:bg-purple-700' },
-  { id: 'planificacion', nombre: 'Planificación', color: 'bg-teal-600 hover:bg-teal-700' },
-  { id: 'apoyo', nombre: 'Apoyo', color: 'bg-pink-600 hover:bg-pink-700' },
-  { id: 'operacion', nombre: 'Operación', color: 'bg-yellow-600 hover:bg-yellow-700' },
-  { id: 'desempeno', nombre: 'Desempeño', color: 'bg-orange-600 hover:bg-orange-700' },
-  { id: 'mejora', nombre: 'Mejora', color: 'bg-red-600 hover:bg-red-700' },
-  { id: 'auditoria', nombre: 'Auditoría', color: 'bg-gray-800 hover:bg-gray-900' }
+  { id: 'objetivos', nombre: 'Objetivos y Beneficios', color: 'bg-blue-600 hover:bg-blue-700', archivo: 'Objetivos.xlsx' },
+  { id: 'phva', nombre: 'Ciclo PHVA', color: 'bg-green-600 hover:bg-green-700', archivo: 'PHVA.jpg' },
+  { id: 'organizacion', nombre: 'Organización', color: 'bg-indigo-600 hover:bg-indigo-700', archivo: 'Organigrama.xlsx' },
+  { id: 'liderazgo', nombre: 'Liderazgo', color: 'bg-purple-600 hover:bg-purple-700', archivo: 'Liderazgo.xlsx' },
+  { id: 'planificacion', nombre: 'Planificación', color: 'bg-teal-600 hover:bg-teal-700', archivo: 'Planificacion.xlsx' },
+  { id: 'apoyo', nombre: 'Apoyo', color: 'bg-pink-600 hover:bg-pink-700', archivo: 'Apoyo.xlsx' },
+  { id: 'operacion', nombre: 'Operación', color: 'bg-yellow-600 hover:bg-yellow-700', archivo: 'Operacion.xlsx' },
+  { id: 'desempeno', nombre: 'Desempeño', color: 'bg-orange-600 hover:bg-orange-700', archivo: 'Desempeno.xlsx' },
+  { id: 'mejora', nombre: 'Mejora', color: 'bg-red-600 hover:bg-red-700', archivo: 'Mejora.xlsx' },
+  { id: 'auditoria', nombre: 'Auditoría', color: 'bg-gray-800 hover:bg-gray-900', archivo: 'Auditoria.xlsx' }
 ];
 
-// Render categorías con iconos
+// Render categorías con iconos y enlaces a documentos
 async function renderCategorias() {
   const res = await fetch('/api/capacitacion/myfiles', {
     headers: { 'Authorization': 'Bearer ' + token }
@@ -95,13 +95,13 @@ async function renderCategorias() {
     const btn = document.createElement('button');
     btn.className = `w-full text-left px-4 py-3 text-white rounded ${cat.color}`;
     btn.innerHTML = `${icon} ${cat.nombre}`;
-    btn.onclick = () => openModal(cat.id, cat.nombre);
+    btn.onclick = () => openModal(cat.id, cat.nombre, cat.archivo);
     container.appendChild(btn);
   });
 }
 
 // Abrir modal
-function openModal(category, name) {
+function openModal(category, name, archivo) {
   currentCategory = category;
   currentCategoryName = name;
   document.getElementById('modalTitle').innerText = name;
@@ -109,6 +109,11 @@ function openModal(category, name) {
   document.getElementById('fileInput').value = '';
   document.getElementById('progressContainer').classList.add('hidden');
   existingFile = null;
+
+  // Actualizar el enlace de descarga
+  const documentLink = document.getElementById('documentBaseLink');
+  documentLink.href = `/docs/${archivo}`;
+  documentLink.innerText = `Descargar ${name} (Documento Base)`;
 
   // Cargar archivo actual del usuario
   fetch('/api/capacitacion/myfiles', {
@@ -184,6 +189,7 @@ renderCategorias();
 </script>
 </body>
 </html>
+
 
 
 
