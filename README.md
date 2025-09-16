@@ -17,6 +17,14 @@ Repositorio demo para una herramienta de implementación, capacitación y audito
 - Node.js >= 16
 - npm
 
+## Instalación de dependencias
+
+Ejecuta el siguiente comando para instalar todas las librerías necesarias:
+
+```
+npm install express cors dotenv sqlite3 node bcrypt multer jsonwebtoken
+```
+
 ## Instalar y ejecutar
 1. `npm install node`
 1.1 `node backend/app.js`

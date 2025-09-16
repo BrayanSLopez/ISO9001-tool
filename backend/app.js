@@ -43,7 +43,7 @@ app.get('/api/health', (req, res) => {
 });
 
 // 👉 Si no es API, devolver index.html (para frontend)
-app.get('*', (req, res) => {
+app.use((req, res, next) => {
   res.sendFile(path.join(__dirname, '..', 'frontend', 'index.html'));
 });
 
