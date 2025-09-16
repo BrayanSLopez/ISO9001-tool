@@ -80,3 +80,6 @@ desktop.ini
 # VS Code
 *.code-workspace
 
+# Database
+*.sqlite
+
