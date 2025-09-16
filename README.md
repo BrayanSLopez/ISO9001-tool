@@ -2,6 +2,17 @@
 
 Repositorio demo para una herramienta de implementación, capacitación y auditoría de la norma ISO 9001.
 
+## Características principales
+
+- Gestión de auditorías internas y externas.
+- Módulo de capacitación para usuarios.
+- Listas de verificación (checklists) para cumplimiento de requisitos.
+- Descarga y almacenamiento de documentos base (Excel, PDF, imágenes).
+- Autenticación de usuarios con JWT.
+- Panel de control (dashboard) para visualización rápida.
+- Subida y gestión de archivos por usuario.
+- Backend en Node.js y frontend HTML estático.
+
 ## Requisitos
 - Node.js >= 16
 - npm
@@ -19,7 +30,50 @@ Repositorio demo para una herramienta de implementación, capacitación y audito
 - contraseña: `demo1234`
 
 ## Estructura
-(ver listado en la descripción del repo)
+
+La estructura del proyecto es la siguiente:
+
+```
+ISO9001-tool/
+├── backend/
+│   ├── app.js
+│   ├── database.sqlite
+│   ├── config/
+│   │   └── db.js
+│   ├── controllers/
+│   │   ├── auditoriaController.js
+│   │   ├── authController.js
+│   │   ├── capacitacionController.js
+│   │   └── checklistController.js
+│   ├── middlewares/
+│   │   └── authMiddleware.js
+│   ├── models/
+│   │   └── init_db.js
+│   └── uploads/
+│       ├── 1757965266130-192582405-auditoria_1.pdf
+│       └── 1757982681771-313850879-Objetivos.xlsx
+├── docs/
+│   ├── Apoyo.xlsx
+│   ├── Auditoria.xlsx
+│   ├── Desempeno.xlsx
+│   ├── Liderazgo.xlsx
+│   ├── Mejora.xlsx
+│   ├── Objetivos.xlsx
+│   ├── Operacion.xlsx
+│   ├── Organigrama.xlsx
+│   ├── PHVA.jpg
+│   └── Planificacion.xlsx
+├── frontend/
+│   ├── auditoria.html
+│   ├── capacitacion.html
+│   ├── checklist.html
+│   ├── dashboard.html
+│   ├── index.html
+│   └── assets/
+│       └── bg.jpg
+├── README.md
+└── .gitignore
+```
 
 ## Notas
 - Archivos subidos por usuarios se almacenan en `backend/uploads`.
