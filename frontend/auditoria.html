@@ -7,54 +7,69 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
-<body class="bg-gray-100 min-h-screen flex flex-col">
-  <header class="bg-blue-700 text-white p-4 text-center text-xl font-bold shadow">
-    Auditoría - Historial
+
+<body class="min-h-screen font-sans text-gray-900 bg-gradient-to-tr from-blue-900 via-blue-500 to-blue-200 bg-fixed flex flex-col">
+  <!-- Header -->
+  <header class="flex justify-between items-center py-4 px-6 bg-gray-50/90 rounded-xl shadow-md mt-4 border border-gray-200 max-w-4xl mx-auto w-full">
+    <div class="flex items-center gap-3">
+      <i class="fa-solid fa-magnifying-glass-chart text-3xl text-indigo-700"></i>
+      <span class="text-2xl font-extrabold text-indigo-700 tracking-tight">Auditoría - Historial</span>
+    </div>
+    <a href="/dashboard.html" class="flex items-center gap-2 px-4 py-2 border border-indigo-600 text-indigo-600 rounded-lg hover:bg-indigo-600 hover:text-white transition-all font-semibold shadow-sm">
+      <i class="fa-solid fa-arrow-left"></i>
+      Volver
+    </a>
   </header>
 
-  <div class="p-4">
-    <a href="/dashboard.html" class="px-3 py-1 bg-gray-600 text-white rounded">&larr; Volver</a>
-  </div>
-  <main class="flex-1 p-6 max-w-6xl mx-auto w-full">
-    <div class="flex items-center justify-between mb-4">
-      <h2 class="text-2xl font-semibold">Historial de Auditorías</h2>
-    </div>
-    <div class="bg-white p-4 rounded shadow mb-6 flex flex-col md:flex-row gap-4 items-end">
-      <div class="flex flex-col">
-        <label class="text-sm font-semibold">Desde:</label>
-        <input type="date" id="filterFrom" class="border rounded p-2"/>
+  <main class="flex-1 flex flex-col justify-center w-full max-w-4xl mx-auto">
+    <section class="mt-8 bg-gray-50/90 p-8 rounded-2xl shadow-2xl border border-gray-200">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-xl font-bold text-indigo-900 flex items-center gap-2"><i class="fa-solid fa-clipboard-list text-indigo-600"></i>Historial de Auditorías</h2>
       </div>
-      <div class="flex flex-col">
-        <label class="text-sm font-semibold">Hasta:</label>
-        <input type="date" id="filterTo" class="border rounded p-2"/>
+      <div class="bg-white/90 p-4 rounded-xl shadow mb-6 flex flex-col md:flex-row gap-4 items-end border border-indigo-100">
+        <div class="flex flex-col">
+          <label class="text-sm font-semibold text-indigo-900">Desde:</label>
+          <input type="date" id="filterFrom" class="border rounded p-2"/>
+        </div>
+        <div class="flex flex-col">
+          <label class="text-sm font-semibold text-indigo-900">Hasta:</label>
+          <input type="date" id="filterTo" class="border rounded p-2"/>
+        </div>
+        <button id="applyFilterBtn" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-semibold flex items-center gap-2"><i class="fa-solid fa-filter"></i>Aplicar Filtro</button>
+        <button id="clearFilterBtn" class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-700 font-semibold flex items-center gap-2"><i class="fa-solid fa-eraser"></i>Limpiar</button>
       </div>
-      <button id="applyFilterBtn" class="px-4 py-2 bg-blue-600 text-white rounded">Aplicar Filtro</button>
-      <button id="clearFilterBtn" class="px-4 py-2 bg-gray-500 text-white rounded">Limpiar</button>
-    </div>
 
-    <div id="history" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"></div>
-    <p id="noDataMsg" class="text-center text-gray-600 mt-8 hidden">No hay auditorías registradas aún.</p>
+      <div id="history" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"></div>
+      <p id="noDataMsg" class="text-center text-gray-600 mt-8 hidden">No hay auditorías registradas aún.</p>
+    </section>
   </main>
 
   <!-- Modal -->
   <div id="modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
-    <div class="bg-white rounded-lg shadow-lg max-w-3xl w-full p-6 overflow-y-auto max-h-[80vh]">
+    <div class="bg-white/95 rounded-2xl shadow-2xl max-w-3xl w-full p-6 overflow-y-auto max-h-[80vh] border border-gray-200">
       <div class="flex items-start justify-between">
-        <h3 id="modalTitle" class="text-xl font-bold">Detalle de la Auditoría</h3>
-        <button id="closeModalBtn" class="text-gray-500 hover:text-gray-800">✕</button>
+        <h3 id="modalTitle" class="text-xl font-bold text-indigo-900 flex items-center gap-2"><i class="fa-solid fa-file-lines text-indigo-600"></i>Detalle de la Auditoría</h3>
+        <button id="closeModalBtn" class="text-gray-500 hover:text-gray-800 text-2xl">✕</button>
       </div>
       <div id="modalMeta" class="mt-2 text-sm text-gray-600"></div>
       <hr class="my-4" />
       <div id="modalContent" class="space-y-3"></div>
       <div class="mt-6 flex justify-between">
-        <button id="downloadPdfBtn" class="px-4 py-2 bg-green-600 text-white rounded">Descargar PDF</button>
-        <button id="closeModalBtnFooter" class="px-4 py-2 bg-red-600 text-white rounded">Cerrar</button>
+        <button id="downloadPdfBtn" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-semibold flex items-center gap-2"><i class="fa-solid fa-file-arrow-down"></i>Descargar PDF</button>
+        <button id="closeModalBtnFooter" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-semibold flex items-center gap-2"><i class="fa-solid fa-xmark"></i>Cerrar</button>
       </div>
     </div>
   </div>
 
-  <footer class="bg-gray-800 text-white text-center p-3 text-sm">
-    © 2025 ISO9001 Tool - Auditoría
+  <!-- Footer -->
+  <footer class="mt-10 text-center text-white text-sm py-4 border-t border-indigo-300 bg-indigo-800/90 rounded-b-xl shadow-lg w-full max-w-4xl mx-auto">
+    <div class="flex flex-col md:flex-row justify-center items-center gap-2">
+      <span class="font-semibold">&copy; 2025 ISO9001 Tool - Auditoría</span>
+      <span class="hidden md:inline">|</span>
+      <a href="mailto:soporte@iso9001tool.com" class="hover:underline text-cyan-200 font-medium"><i class="fa-solid fa-envelope"></i> Contacto</a>
+      <span class="hidden md:inline">|</span>
+      <a href="https://www.iso.org/iso-9001-quality-management.html" target="_blank" class="hover:underline text-cyan-200 font-medium"><i class="fa-solid fa-globe"></i> Más sobre ISO 9001</a>
+    </div>
   </footer>
 
   <script>

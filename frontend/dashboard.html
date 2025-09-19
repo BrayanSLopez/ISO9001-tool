@@ -4,49 +4,78 @@
   <meta charset="utf-8" />
   <title>Dashboard - ISO9001</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
 </head>
-<body class="bg-gray-100 min-h-screen font-sans text-gray-900">
+<body class="min-h-screen font-sans text-gray-900 bg-gradient-to-tr from-blue-900 via-blue-500 to-blue-200 bg-fixed">
 
   <!-- Contenedor principal -->
-  <div class="max-w-4xl mx-auto p-6">
+  <div class="max-w-4xl mx-auto p-6 flex flex-col min-h-screen">
 
     <!-- Cabecera -->
-    <div class="flex justify-between items-center">
-      <h1 class="text-3xl font-extrabold text-blue-700">ISO9001 Tool</h1>
-      <button id="logout" class="px-4 py-2 border border-red-600 text-red-600 rounded hover:bg-red-600 hover:text-white transition-all">Cerrar sesión</button>
-    </div>
+  <header class="flex justify-between items-center py-4 px-6 bg-gray-50/90 rounded-xl shadow-md mt-4 border border-gray-200">
+      <div class="flex items-center gap-3">
+        <img src="/assets/bg.jpg" alt="Logo" class="w-10 h-10 rounded-full border-2 border-blue-600 shadow-sm" />
+        <h1 class="text-3xl font-extrabold text-blue-700 tracking-tight flex items-center gap-2">
+          <i class="fa-solid fa-certificate text-indigo-500"></i>
+          ISO9001 Tool
+        </h1>
+      </div>
+      <button id="logout" class="flex items-center gap-2 px-4 py-2 border border-red-600 text-red-600 rounded-lg hover:bg-red-600 hover:text-white transition-all font-semibold shadow-sm">
+        <i class="fa-solid fa-right-from-bracket"></i>
+        Cerrar sesión
+      </button>
+    </header>
 
     <!-- Bienvenida y botones -->
-    <div class="mt-6 bg-white p-6 rounded-xl shadow-lg">
-      <p class="text-lg">Bienvenido, <span id="userName" class="font-semibold text-blue-600"></span></p>
-      <div class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-6">
+    <main class="flex-1 flex flex-col justify-center">
+  <section class="mt-8 bg-gray-50/90 p-8 rounded-2xl shadow-2xl border border-gray-200">
+  <p class="text-xl md:text-2xl font-semibold text-blue-900 flex items-center gap-2">
+          <i class="fa-solid fa-user-circle text-blue-500"></i>
+          Bienvenido, <span id="userName" class="font-bold text-blue-700"></span>
+        </p>
+        <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-8">
 
-        <!-- Implementación -->
-        <div class="text-center bg-blue-600 text-white rounded-xl hover:shadow-xl transition-all">
-          <a href="/checklist.html" class="p-6 block font-semibold text-lg rounded-t-xl hover:bg-blue-700 transition-all">
-            Implementación
-          </a>
-          <p class="text-gray-200 p-4 rounded-b-xl bg-blue-700">Aplicación práctica de los controles y procesos de la norma ISO 9001 dentro de la empresa.</p>
+          <!-- Implementación -->
+          <div class="group text-center bg-blue-600 text-white rounded-2xl shadow-lg hover:scale-105 hover:shadow-2xl transition-all duration-300 cursor-pointer border-2 border-blue-700/30">
+            <a href="/checklist.html" class="p-8 block font-bold text-lg rounded-t-2xl hover:bg-blue-700 transition-all flex flex-col items-center gap-2">
+              <i class="fa-solid fa-list-check text-3xl mb-2"></i>
+              Implementación
+            </a>
+            <p class="text-gray-200 p-4 rounded-b-2xl bg-blue-700/90 text-sm md:text-base">Aplicación práctica de los controles y procesos de la norma ISO 9001 dentro de la empresa.</p>
+          </div>
+
+          <!-- Capacitación -->
+          <div class="group text-center bg-green-600 text-white rounded-2xl shadow-lg hover:scale-105 hover:shadow-2xl transition-all duration-300 cursor-pointer border-2 border-green-700/30">
+            <a href="/capacitacion.html" class="p-8 block font-bold text-lg rounded-t-2xl hover:bg-green-700 transition-all flex flex-col items-center gap-2">
+              <i class="fa-solid fa-chalkboard-user text-3xl mb-2"></i>
+              Capacitación
+            </a>
+            <p class="text-gray-200 p-4 rounded-b-2xl bg-green-700/90 text-sm md:text-base">Proceso de formación del personal para aplicar correctamente la norma y manejar correctamente los procesos.</p>
+          </div>
+
+          <!-- Auditoría -->
+          <div class="group text-center bg-indigo-600 text-white rounded-2xl shadow-lg hover:scale-105 hover:shadow-2xl transition-all duration-300 cursor-pointer border-2 border-indigo-700/30">
+            <a href="/auditoria.html" class="p-8 block font-bold text-lg rounded-t-2xl hover:bg-indigo-700 transition-all flex flex-col items-center gap-2">
+              <i class="fa-solid fa-magnifying-glass-chart text-3xl mb-2"></i>
+              Auditoría
+            </a>
+            <p class="text-gray-200 p-4 rounded-b-2xl bg-indigo-700/90 text-sm md:text-base">Evaluación sistemática para verificar el cumplimiento y la eficacia del sistema de gestión de procesos.</p>
+          </div>
+
         </div>
+      </section>
+    </main>
 
-        <!-- Capacitación -->
-        <div class="text-center bg-green-600 text-white rounded-xl hover:shadow-xl transition-all">
-          <a href="/capacitacion.html" class="p-6 block font-semibold text-lg rounded-t-xl hover:bg-green-700 transition-all">
-            Capacitación
-          </a>
-          <p class="text-gray-200 p-4 rounded-b-xl bg-green-700">Proceso de formación del personal para aplicar correctamente la norma y manejar correctamente los procesos.</p>
-        </div>
-
-        <!-- Auditoría -->
-        <div class="text-center bg-indigo-600 text-white rounded-xl hover:shadow-xl transition-all">
-          <a href="/auditoria.html" class="p-6 block font-semibold text-lg rounded-t-xl hover:bg-indigo-700 transition-all">
-            Auditoría
-          </a>
-          <p class="text-gray-200 p-4 rounded-b-xl bg-indigo-700">Evaluación sistemática para verificar el cumplimiento y la eficacia del sistema de gestion de procesos.</p>
-        </div>
-
+    <!-- Footer -->
+    <footer class="mt-10 text-center text-white text-sm py-4 border-t border-blue-300 bg-blue-800/90 rounded-b-xl shadow-lg">
+      <div class="flex flex-col md:flex-row justify-center items-center gap-2">
+        <span class="font-semibold">&copy; 2025 ISO9001 Tool</span>
+        <span class="hidden md:inline">|</span>
+        <a href="mailto:soporte@iso9001tool.com" class="hover:underline text-cyan-200 font-medium"><i class="fa-solid fa-envelope"></i> Contacto</a>
+        <span class="hidden md:inline">|</span>
+        <a href="https://www.iso.org/iso-9001-quality-management.html" target="_blank" class="hover:underline text-cyan-200 font-medium"><i class="fa-solid fa-globe"></i> Más sobre ISO 9001</a>
       </div>
-    </div>
+    </footer>
   </div>
 
   <script>
