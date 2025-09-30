@@ -84,7 +84,9 @@ const categorias = [
   { id: 'operacion', nombre: 'Operación', color: 'bg-yellow-600 hover:bg-yellow-700', archivo: 'Operacion.xlsx' },
   { id: 'desempeno', nombre: 'Desempeño', color: 'bg-orange-600 hover:bg-orange-700', archivo: 'Desempeno.xlsx' },
   { id: 'mejora', nombre: 'Mejora', color: 'bg-red-600 hover:bg-red-700', archivo: 'Mejora.xlsx' },
-  { id: 'auditoria', nombre: 'Auditoría', color: 'bg-gray-800 hover:bg-gray-900', archivo: 'Auditoria.xlsx' }
+  { id: 'auditoria', nombre: 'Auditoría', color: 'bg-gray-800 hover:bg-gray-900', archivo: 'Auditoria.xlsx' },
+  // Nueva categoría: Video de capacitación
+  { id: 'video', nombre: 'Video de Capacitación', color: 'bg-cyan-700 hover:bg-cyan-800', videoUrl: 'https://www.youtube.com/embed/3vsLAXD_sd0?si=asn4a_7d6utCQ9hj' }
 ];
 
 // Render categorías con iconos y enlaces a documentos
@@ -97,12 +99,23 @@ async function renderCategorias() {
   container.innerHTML = '';
 
   categorias.forEach(cat => {
+    // Botón de categoría
     const file = files.find(f => f.categoria === cat.id);
     const icon = file ? '✅' : '📂';
     const btn = document.createElement('button');
-    btn.className = `w-full text-left px-4 py-3 text-white rounded-2xl bg-green-600 hover:bg-green-700 shadow-lg transition-all duration-200 font-semibold flex items-center gap-2`;
-    btn.innerHTML = `${icon} ${cat.nombre}`;
+    btn.className = `w-full text-left px-4 py-3 text-white rounded-2xl bg-green-600 hover:bg-green-700 shadow-lg transition-all duration-200 font-semibold flex flex-col items-start gap-2`;
+    btn.innerHTML = `<span class="flex items-center gap-2">${icon} ${cat.nombre}</span>`;
     btn.onclick = () => openModal(cat.id, cat.nombre, cat.archivo);
+
+    // Enlace al video debajo del nombre
+    const videoLink = document.createElement('a');
+    videoLink.href = 'https://www.youtube.com/watch?v=3vsLAXD_sd0';
+    videoLink.target = '_blank';
+    videoLink.rel = 'noopener noreferrer';
+    videoLink.className = 'mt-1 text-cyan-200 underline text-sm flex items-center gap-1';
+    videoLink.innerHTML = '<i class="fa-brands fa-youtube text-lg text-red-500"></i> Ver video';
+    btn.appendChild(videoLink);
+
     container.appendChild(btn);
   });
 }

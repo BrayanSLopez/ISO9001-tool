@@ -10,6 +10,7 @@ const capacitacionRoutes = require('./controllers/capacitacionController');
 const auditoriaRoutes = require('./controllers/auditoriaController');
 
 const app = express();
+
 const PORT = process.env.PORT || 4000;
 
 app.use(cors());
