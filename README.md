@@ -27,7 +27,7 @@ npm install express cors dotenv sqlite3 node bcrypt multer jsonwebtoken
 
 ## Instalar y ejecutar
 1. `npm install node`
-1.1 `node backend/app.js`
+1.1 `node backend/index.js`
 2. Copia `.env.example` a `.env` y ajusta si quieres.
 3. `npm start`
 4. El backend correrá en `http://localhost:4000` por defecto.
@@ -44,7 +44,7 @@ La estructura del proyecto es la siguiente:
 ```
 ISO9001-tool/
 ├── backend/
-│   ├── app.js
+│   ├── index.js
 │   ├── database.sqlite
 │   ├── config/
 │   │   └── db.js
